@@ -20,6 +20,12 @@ app.get('/', function(req, res) {
 	res.render('index');
 });
 
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.get('/listRecords', function (req, res) {
    fs.readFile( __dirname + "/" + "records.json", 'utf8', function (err, data) {
       console.log( data );
@@ -27,14 +33,26 @@ app.get('/listRecords', function (req, res) {
    });
 })
 
-app.post('/addRecord', function (req, res) {
+app.post('/addRecord/:fullName:phone:id', function (req, res) {
    // First read existing users.
    fs.readFile( __dirname + "/" + "records.json", 'utf8', function (err, data) {
+	var test = "\""+req.params.id+"\"";   
+	var user = {
+	  test : {
+      "fullName" : ""+req.params.fullName+"",
+      "phone" : ""+req.params.phone+"",
+      "id": ""+req.params.id+""
+      }
+	}   
+	   
       data = JSON.parse( data );
-      data[""] = user[""];
+      data[req.params.id] = user[req.params.id];
       console.log( data );
       res.end( JSON.stringify(data));
    });
+    backURL=req.header('Referer') || '/';
+  // do your thang
+  res.redirect(backURL);
 })
 
 app.get('/:id', function (req, res) {
@@ -47,15 +65,20 @@ app.get('/:id', function (req, res) {
    });
 })
 
-app.delete('/deleteRecord', function (req, res) {
+app.delete('/deleteRecord/:id', function (req, res) {
    // First read existing users.
    fs.readFile( __dirname + "/" + "records.json", 'utf8', function (err, data) {
       data = JSON.parse( data );
-      delete data["user" + 2];
+      delete data[req.params.id];
        
       console.log( data );
       res.end( JSON.stringify(data));
+	  
+	   
    });
+   backURL=req.header('Referer') || '/';
+		// do your thang
+		res.redirect(backURL);
 })
 
 app.listen(port, function() {
